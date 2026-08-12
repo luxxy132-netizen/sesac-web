@@ -34,7 +34,24 @@
       "Bash(git ls-tree *)",
       "Bash(git pull *)",
       "PowerShell(& \"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" api -X POST repos/luxxy132-netizen/sesac-web/pages -f \"source[branch]=main\" -f \"source[path]=/\")",
-      "PowerShell(& \"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" api repos/luxxy132-netizen/sesac-web/pages/builds/latest --jq \"{status: .status, error: .error}\")"
+      "PowerShell(& \"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" api repos/luxxy132-netizen/sesac-web/pages/builds/latest --jq \"{status: .status, error: .error}\")",
+      "PowerShell(& \"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" pr create --title \"Allow Pages-deployment git/gh commands in local settings\" --body \"Adds the git and gh CLI command patterns used while pushing to main and enabling GitHub Pages \\(remote, branch, push, fetch, pull, ls-tree, and the Pages API calls\\) to the local Claude Code permission allowlist.\")",
+      "Bash('/c/Program Files/GitHub CLI/gh.exe' repo view wanteddev/montage-web --json name,description,homepageUrl,repositoryTopics)",
+      "Bash('/c/Program Files/GitHub CLI/gh.exe' api repos/wanteddev/montage-web/readme --jq .content)",
+      "Bash('/c/Program Files/GitHub CLI/gh.exe' api repos/wanteddev/montage-web/contents/packages/wds-theme --jq .[].name)",
+      "Bash('/c/Program Files/GitHub CLI/gh.exe' api repos/wanteddev/montage-web/contents/packages/wds-theme/src --jq .[].name)",
+      "Bash('/c/Program Files/GitHub CLI/gh.exe' api repos/wanteddev/montage-web/contents/packages/wds-theme/src/theme --jq .[].name)",
+      "Bash('/c/Program Files/GitHub CLI/gh.exe' api repos/wanteddev/montage-web/contents/packages/wds-theme/src/theme/atomic --jq .[].name)",
+      "Bash('/c/Program Files/GitHub CLI/gh.exe' api repos/wanteddev/montage-web/contents/packages/wds-theme/src/theme/semantic --jq .[].name)",
+      "Bash('/c/Program Files/GitHub CLI/gh.exe' api repos/wanteddev/montage-web/contents/packages/wds-theme/src/theme/atomic/blue.ts --jq .content)",
+      "Bash('/c/Program Files/GitHub CLI/gh.exe' api repos/wanteddev/montage-web/contents/packages/wds-theme/src/theme/semantic/index.ts --jq .content)",
+      "Bash('/c/Program Files/GitHub CLI/gh.exe' api repos/wanteddev/montage-web/contents/packages/wds-theme/src/theme/spacing --jq .[].name)",
+      "Bash('/c/Program Files/GitHub CLI/gh.exe' api repos/wanteddev/montage-web/contents/packages/wds-theme/src/theme/spacing/index.ts --jq .content)",
+      "Bash('/c/Program Files/GitHub CLI/gh.exe' api repos/wanteddev/montage-web/contents/packages/wds/src --jq .[].name)",
+      "Bash('/c/Program Files/GitHub CLI/gh.exe' api repos/wanteddev/montage-web/contents/packages/wds/src/components --jq .[].name)",
+      "Bash('/c/Program Files/GitHub CLI/gh.exe' api repos/wanteddev/montage-web/contents/packages/wds/src/components/typography --jq .[].name)",
+      "Bash('/c/Program Files/GitHub CLI/gh.exe' api repos/wanteddev/montage-web/contents/packages/wds/src/components/typography/style.ts --jq .content)",
+      "Bash(git checkout *)"
     ]
   }
 }
