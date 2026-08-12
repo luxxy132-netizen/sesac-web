@@ -3,276 +3,81 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>한수정</title>
-<style>
-  /* Montage(@wanteddev/wds) design tokens: https://github.com/wanteddev/montage-web */
-  :root {
-    --color-primary-normal: #FF4242;
-    --color-primary-strong: #E52222;
-    --color-primary-heavy: #B00C0C;
-    --color-primary-bg: #FEECEC;
-
-    --color-label-normal: #171717;
-    --color-label-neutral: rgba(48, 48, 48, 0.88);
-    --color-label-alternative: rgba(56, 56, 56, 0.61);
-    --color-label-assistive: rgba(56, 56, 56, 0.28);
-
-    --color-bg-normal: #ffffff;
-    --color-bg-alternative: #F7F7F7;
-
-    --color-line-normal: rgba(115, 115, 115, 0.22);
-    --color-line-solid: #F2F2F2;
-
-    --color-status-positive: #16A34A;
-
-    --radius-medium: 12px;
-    --radius-large: 16px;
-
-    --shadow-small: 0px 2px 4px -2px rgba(23, 23, 23, 0.06), 0px 4px 6px -1px rgba(23, 23, 23, 0.06);
-    --shadow-medium: 0px 4px 6px -2px rgba(23, 23, 23, 0.07), 0px 10px 15px -3px rgba(23, 23, 23, 0.07);
-
-    --space-4: 4px;
-    --space-8: 8px;
-    --space-12: 12px;
-    --space-16: 16px;
-    --space-24: 24px;
-    --space-32: 32px;
-    --space-48: 48px;
-  }
-
-  * { box-sizing: border-box; }
-
-  body {
-    font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
-    color: var(--color-label-normal);
-    background: var(--color-bg-alternative);
-    margin: 0;
-    padding: var(--space-48) var(--space-16);
-  }
-
-  main {
-    max-width: 720px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-32);
-  }
-
-  .card {
-    background: var(--color-bg-normal);
-    border-radius: var(--radius-large);
-    box-shadow: var(--shadow-medium);
-    padding: var(--space-32);
-  }
-
-  .eyebrow {
-    display: inline-block;
-    font-size: 0.8125rem;
-    line-height: 1.125rem;
-    letter-spacing: 0.0194em;
-    font-weight: 600;
-    color: var(--color-primary-normal);
-    background: var(--color-primary-bg);
-    padding: var(--space-4) var(--space-12);
-    border-radius: 999px;
-    margin-bottom: var(--space-16);
-  }
-
-  h1 {
-    /* Typography/title2 */
-    font-size: 1.75rem;
-    line-height: 2.375rem;
-    letter-spacing: -0.0236em;
-    font-weight: 700;
-    margin: 0 0 var(--space-8);
-  }
-
-  .lead {
-    /* Typography/body1-reading */
-    font-size: 1rem;
-    line-height: 1.625rem;
-    letter-spacing: 0.0057em;
-    color: var(--color-label-neutral);
-    margin: 0;
-  }
-
-  .lead + .lead { margin-top: var(--space-4); }
-
-  .info-list {
-    margin-top: var(--space-24);
-    display: flex;
-    flex-direction: column;
-  }
-
-  .info-row {
-    display: flex;
-    justify-content: space-between;
-    gap: var(--space-16);
-    padding: var(--space-12) 0;
-    border-bottom: 1px solid var(--color-line-solid);
-  }
-
-  .info-row:last-child { border-bottom: none; }
-
-  .info-label {
-    /* Typography/label1 */
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-    letter-spacing: 0.0145em;
-    color: var(--color-label-alternative);
-  }
-
-  .info-value {
-    /* Typography/body2 */
-    font-size: 0.9375rem;
-    line-height: 1.375rem;
-    letter-spacing: 0.0096em;
-    font-weight: 500;
-  }
-
-  .section-header {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    margin-bottom: var(--space-16);
-  }
-
-  .section-header h1 { margin-bottom: 0; }
-
-  .caption {
-    /* Typography/caption1 */
-    font-size: 0.75rem;
-    line-height: 1rem;
-    letter-spacing: 0.0252em;
-    color: var(--color-label-assistive);
-  }
-
-  .deal-list {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .deal-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-16);
-    padding: var(--space-16) 0;
-    border-bottom: 1px solid var(--color-line-solid);
-  }
-
-  .deal-item:last-child { border-bottom: none; }
-
-  .deal-main { display: flex; flex-direction: column; gap: var(--space-4); min-width: 0; }
-
-  .deal-name {
-    /* Typography/headline1 */
-    font-size: 1.125rem;
-    line-height: 1.625rem;
-    letter-spacing: -0.002em;
-    font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .deal-date {
-    /* Typography/label2 */
-    font-size: 0.8125rem;
-    line-height: 1.125rem;
-    letter-spacing: 0.0194em;
-    color: var(--color-label-alternative);
-  }
-
-  .deal-price {
-    /* Typography/heading2 */
-    font-size: 1.25rem;
-    line-height: 1.75rem;
-    letter-spacing: -0.012em;
-    font-weight: 700;
-    color: var(--color-primary-normal);
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  .deal-price .unit {
-    font-size: 0.8125rem;
-    font-weight: 500;
-    color: var(--color-label-alternative);
-    margin-left: 2px;
-  }
-</style>
+<title>서울 아파트 실거래 대시보드</title>
+<link rel="stylesheet" href="assets/dashboard.css">
 </head>
-<body>
+<body class="dashboard">
   <main>
-    <section class="card">
-      <span class="eyebrow">INTRO</span>
-      <h1>한수정</h1>
-      <p class="lead">한수정입니다.</p>
-      <p class="lead">저는 로블록스가 좋아요.</p>
-      <p class="lead">앞으로도 재미있는 걸 많이 만들어보고 싶어요.</p>
+    <header class="page-header">
+      <div class="page-header-text">
+        <span class="eyebrow">DASHBOARD</span>
+        <h1>서울 아파트 실거래 대시보드</h1>
+        <p class="lead">최근 12개월(2025-07 ~ 2026-06) 실거래 32만 건을 구·거래유형별로 살펴보세요.</p>
+      </div>
+      <nav class="top-nav" aria-label="보조 메뉴">
+        <a href="about.html">한수정 소개 →</a>
+      </nav>
+    </header>
 
-      <div class="info-list">
-        <div class="info-row">
-          <span class="info-label">좋아하는 것</span>
-          <span class="info-value">로블록스</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">요즘 배우는 것</span>
-          <span class="info-value">코딩</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">오늘 목표</span>
-          <span class="info-value">index.html 완성하기</span>
-        </div>
+    <p id="errorBanner" class="error-state card" hidden></p>
+
+    <section class="card controls-card" aria-label="필터">
+      <div class="control-group">
+        <label for="guSelect">자치구</label>
+        <select id="guSelect" class="gu-select" aria-label="자치구 선택"></select>
+      </div>
+      <div class="control-group">
+        <span id="dealTypeLabel">거래유형</span>
+        <div id="dealTypeTabs" class="tabs" role="tablist" aria-labelledby="dealTypeLabel"></div>
       </div>
     </section>
 
-    <section class="card">
-      <div class="section-header">
-        <h1>은평구 아파트 실거래 살펴보기</h1>
-        <span class="caption">물건금액 상위 5건</span>
-      </div>
-      <p class="lead" style="margin-bottom: var(--space-24);">은평구 개 호감 아파트들</p>
+    <p id="provisionalNote" class="caption kpi-caveat" role="note"></p>
 
-      <div class="deal-list">
-        <div class="deal-item">
-          <div class="deal-main">
-            <span class="deal-name">은평뉴타운 제각말 푸르지오(5-2단지)</span>
-            <span class="deal-date">2026-04-02</span>
+    <section class="kpi-row" id="kpiRow" aria-label="시장 요약 KPI"></section>
+
+    <div class="content-grid">
+      <section class="card chart-card" aria-label="추이 차트">
+        <div class="chart-toolbar">
+          <div class="section-header" style="margin-bottom:0;">
+            <h1 style="font-size:1.25rem;line-height:1.75rem;">추이 <span id="selectionSummary" class="caption"></span></h1>
           </div>
-          <span class="deal-price">193,000<span class="unit">만원</span></span>
-        </div>
-        <div class="deal-item">
-          <div class="deal-main">
-            <span class="deal-name">DMCSKVIEW</span>
-            <span class="deal-date">2025-10-11</span>
+          <div class="control-group" style="gap:4px;">
+            <span id="metricToggleLabel" class="caption">지표</span>
+            <div id="metricToggle" class="metric-toggle" role="group" aria-labelledby="metricToggleLabel"></div>
           </div>
-          <span class="deal-price">186,500<span class="unit">만원</span></span>
         </div>
-        <div class="deal-item">
-          <div class="deal-main">
-            <span class="deal-name">DMC센트럴자이(3단지)</span>
-            <span class="deal-date">2026-05-23</span>
-          </div>
-          <span class="deal-price">180,000<span class="unit">만원</span></span>
+        <div class="chart-wrap">
+          <div class="chart-scroll" id="chartSvgWrap"></div>
+          <div class="chart-tooltip" id="chartTooltip" role="status" aria-live="polite"></div>
         </div>
-        <div class="deal-item">
-          <div class="deal-main">
-            <span class="deal-name">DMC센트럴자이(1단지)</span>
-            <span class="deal-date">2026-06-09</span>
-          </div>
-          <span class="deal-price">180,000<span class="unit">만원</span></span>
+        <div class="chart-legend">
+          <span><span class="swatch" style="background:var(--color-primary-normal)"></span>선택 지표 (선)</span>
+          <span><span class="swatch" style="background:var(--color-primary-bg)"></span>거래량 (막대, 보조축)</span>
+          <span><span class="swatch swatch-dashed"></span>최근월 잠정치 (신고 지연 가능)</span>
         </div>
-        <div class="deal-item">
-          <div class="deal-main">
-            <span class="deal-name">DMC센트럴자이(3단지)</span>
-            <span class="deal-date">2026-05-25</span>
-          </div>
-          <span class="deal-price">179,000<span class="unit">만원</span></span>
+      </section>
+
+      <section class="card ranking-card" aria-label="구별 랭킹">
+        <div class="section-header">
+          <h1 style="font-size:1.25rem;line-height:1.75rem;">구별 랭킹</h1>
+          <span class="caption">헤더 클릭으로 정렬 · 행 클릭으로 구 선택</span>
         </div>
+        <div class="table-scroll" id="rankingTableWrap"></div>
+      </section>
+    </div>
+
+    <section class="card search-card" aria-label="단지명 검색">
+      <div class="section-header">
+        <h1 style="font-size:1.25rem;line-height:1.75rem;">단지명 검색</h1>
+        <span class="caption">8,216개 단지</span>
       </div>
+      <label for="complexSearch" class="visually-hidden">단지명 검색</label>
+      <input id="complexSearch" class="search-input" type="text" placeholder="단지명을 입력하세요 (예: 자이, 푸르지오)" autocomplete="off">
+      <p id="searchStatus" class="search-status" aria-live="polite"></p>
+      <div id="searchResults" class="search-results"></div>
     </section>
   </main>
+  <script src="assets/dashboard.js"></script>
 </body>
 </html>
