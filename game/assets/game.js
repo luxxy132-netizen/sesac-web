@@ -220,15 +220,16 @@
     var max = buckets.reduce(function (m, b) { return Math.max(m, metric.value(b)); }, 0);
     var ranked = buckets.slice().sort(function (a, b) { return metric.value(b) - metric.value(a); });
 
-    // 아이콘 크기는 값의 제곱근에 비례 — 넓이가 값에 비례해 보이도록
-    function size(b) { return max ? 12 + Math.sqrt(metric.value(b) / max) * 15 : 0; }
+    // 크기 차이를 크게 벌린다. 넓이 비례(√, 지수 0.5)보다 센 지수 0.72를 써서
+    // 1위 고래가 확실히 압도하게 하되, 최소 크기는 눌릴 만큼 남긴다.
+    function size(b) { return max ? 11 + Math.pow(metric.value(b) / max, 0.72) * 35 : 0; }
 
     // 큰 고래부터 그려서 작은 고래가 위에 오게 한다 (몰린 지역에서 작은 쪽이 묻히지 않도록)
     el.mapMarks.innerHTML = ranked.map(function (b, rank) {
       var p = world.points[b.name];
       var selected = state.country === b.index;
       var s = size(b);
-      var hit = Math.max(s * 0.55, 15);
+      var hit = Math.max(s * 0.55, 15);   // 작은 고래도 모바일에서 24px 이상으로 눌리게
       var label = rank < 3
         ? '<text class="mark-value" y="' + (-s * 0.55 - 5) + '" text-anchor="middle">' + b.name + " " + metric.format(b) + "</text>"
         : "";
