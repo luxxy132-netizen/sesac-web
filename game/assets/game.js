@@ -568,15 +568,14 @@
     });
   }
 
+  /* 필터를 먼저 적용하고, 새로 그려진 고래에서 한 번만 튀게 한다.
+     (튀는 도중에 다시 그리면 모션이 중간에 끊겨 두 번 튀는 것처럼 보인다) */
   function selectMark(mark) {
     var idx = Number(mark.getAttribute("data-index"));
-    bounce(mark.querySelector(".mark-inner"));     // 먼저 튀고, 그 다음 다시 그린다
-    setTimeout(function () {
-      state.country = state.country === idx ? null : idx;
-      render();
-      var next = el.mapMarks.querySelector('.map-mark[data-index="' + idx + '"] .mark-inner');
-      if (next && state.country === idx) bounce(next);
-    }, 190);
+    state.country = state.country === idx ? null : idx;
+    render();
+    var next = el.mapMarks.querySelector('.map-mark[data-index="' + idx + '"] .mark-inner');
+    bounce(next || mark.querySelector(".mark-inner"));
   }
 
   /* 드래그 이동 · Ctrl+휠 / 더블클릭 / 버튼 확대. 확대하면 고래 아이콘은 그대로고 간격만 벌어진다. */
@@ -595,7 +594,7 @@
     function pointerList() { return Object.keys(pointers).map(function (id) { return pointers[id]; }); }
     function pinchDistance(ps) { return Math.hypot(ps[0].x - ps[1].x, ps[0].y - ps[1].y); }
 
-    var pinchStart = null;
+    var pinchStart = null, pressedMark = null, captured = false;
 
     el.map.addEventListener("pointerdown", function (e) {
       pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
@@ -607,8 +606,11 @@
       }
       dragging = true;
       moved = 0;
+      captured = false;
+      // 누른 순간의 고래를 기억해 둔다. 드래그가 시작되면 포인터 캡처가 걸려
+      // pointerup의 target이 <svg>로 바뀌기 때문에, 그때 찾으면 이미 늦다.
+      pressedMark = closest(e.target, ".map-mark");
       panStart = { view: toView(e.clientX, e.clientY), tx: mapView.tx, ty: mapView.ty, x: e.clientX, y: e.clientY };
-      try { el.map.setPointerCapture(e.pointerId); } catch (err) { /* 포인터가 이미 놓인 경우 */ }
     });
 
     el.map.addEventListener("pointermove", function (e) {
@@ -625,6 +627,10 @@
       }
       if (!dragging || !panStart) return;
       moved = Math.max(moved, Math.hypot(e.clientX - panStart.x, e.clientY - panStart.y));
+      if (!captured && moved >= 5) {           // 실제로 끌기 시작할 때만 캡처 (클릭 타깃 보존)
+        captured = true;
+        try { el.map.setPointerCapture(e.pointerId); } catch (err) { /* 이미 놓인 포인터 */ }
+      }
       var now = toView(e.clientX, e.clientY);
       mapView.tx = panStart.tx + (now.x - panStart.view.x);
       mapView.ty = panStart.ty + (now.y - panStart.view.y);
@@ -636,10 +642,15 @@
       if (pointerList().length < 2) pinchStart = null;
       if (!dragging) return;
       dragging = false;
+      if (captured) {
+        try { el.map.releasePointerCapture(e.pointerId); } catch (err) { /* 이미 해제됨 */ }
+        captured = false;
+      }
       if (moved < 5) {                       // 끌지 않았으면 클릭으로 본다
-        var mark = closest(e.target, ".map-mark");
+        var mark = pressedMark || closest(e.target, ".map-mark");
         if (mark) selectMark(mark);
       }
+      pressedMark = null;
       panStart = null;
     }
     el.map.addEventListener("pointerup", endPointer);
