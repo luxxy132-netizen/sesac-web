@@ -2,10 +2,10 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "static",
+      "name": "sesac-web",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "4173"],
-      "port": 4173
+      "runtimeArgs": ["-m", "http.server", "8123"],
+      "port": 8123
     }
   ]
 }
