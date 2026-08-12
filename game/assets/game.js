@@ -7,7 +7,7 @@
 
   var COUNTRY = 0, GENRE = 1, SEGMENT = 2, AMOUNT = 3;
   var SEG_COLOR = { Whale: "var(--seg-whale)", Dolphin: "var(--seg-dolphin)", Minnow: "var(--seg-minnow)" };
-  var SEG_ICON = { Whale: "#icon-whale", Dolphin: "#icon-dolphin", Minnow: "#icon-minnow" };
+  var SEG_EMOJI = { Whale: "🐳", Dolphin: "🐬", Minnow: "🐟" };
   var SEG_KO = { Whale: "고래 Whale", Dolphin: "돌고래 Dolphin", Minnow: "피라미 Minnow" };
   // 채움 색 위에 올리는 글자색은 채움의 밝기로 고른다 (어두운 Minnow 위에서는 흰 글자)
   var SEG_INK = { Whale: "#0B141C", Dolphin: "#0B141C", Minnow: "#F2F7FA" };
@@ -30,6 +30,8 @@
     reset: document.getElementById("resetBtn"),
     filterSummary: document.getElementById("filterSummary"),
     map: document.getElementById("worldMap"),
+    mapLand: document.getElementById("mapLand"),
+    mapMarks: document.getElementById("mapMarks"),
     mapSummary: document.getElementById("mapSummary"),
     mapLegend: document.getElementById("mapLegend"),
     kpiRow: document.getElementById("kpiRow"),
@@ -55,8 +57,7 @@
     return (part / whole * 100).toFixed(d) + "%";
   }
   function icon(name, cls) {
-    return '<svg class="seg-icon' + (cls ? " " + cls : "") + '" aria-hidden="true"><use href="' +
-      SEG_ICON[name] + '"/></svg>';
+    return '<span class="seg-emoji' + (cls ? " " + cls : "") + '" aria-hidden="true">' + SEG_EMOJI[name] + "</span>";
   }
 
   /* ---------- aggregation ---------- */
@@ -157,56 +158,107 @@
     return mapViewBox;
   }
 
+  /* 화면 좌표 = 세계좌표 * k + t. 확대해도 고래 아이콘 자체는 커지지 않고 위치만 벌어져,
+     유럽처럼 몰린 지역을 확대하면 겹쳐 있던 고래들이 떨어진다. */
+  var mapView = { k: 1, tx: 0, ty: 0 };
+  var landDrawn = false;
+
+  function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+  function clampPan() {
+    var vb = viewBox(state.world);
+    var k = mapView.k;
+    mapView.tx = clamp(mapView.tx, (vb[0] + vb[2]) * (1 - k), vb[0] * (1 - k));
+    mapView.ty = clamp(mapView.ty, (vb[1] + vb[3]) * (1 - k), vb[1] * (1 - k));
+  }
+
+  function applyMapTransform() {
+    clampPan();
+    var k = mapView.k;
+    el.mapLand.setAttribute("transform", "translate(" + mapView.tx + " " + mapView.ty + ") scale(" + k + ")");
+    Array.prototype.forEach.call(el.mapMarks.children, function (g) {
+      var x = Number(g.getAttribute("data-x")) * k + mapView.tx;
+      var y = Number(g.getAttribute("data-y")) * k + mapView.ty;
+      g.setAttribute("transform", "translate(" + x.toFixed(1) + " " + y.toFixed(1) + ")");
+    });
+    el.mapMarks.classList.toggle("is-zoomed", k >= 1.8);
+    el.map.classList.toggle("is-zoomed", k > 1);
+    var resetBtn = document.querySelector('.zoom-btn[data-zoom="reset"]');
+    if (resetBtn) resetBtn.disabled = k === 1 && mapView.tx === 0 && mapView.ty === 0;
+  }
+
+  function zoomAt(factor, cx, cy) {
+    var vb = viewBox(state.world);
+    if (cx === undefined) { cx = vb[0] + vb[2] / 2; cy = vb[1] + vb[3] / 2; }
+    var k0 = mapView.k;
+    var k1 = clamp(k0 * factor, 1, 8);
+    if (k1 === k0) return;
+    mapView.tx = cx - (k1 / k0) * (cx - mapView.tx);
+    mapView.ty = cy - (k1 / k0) * (cy - mapView.ty);
+    mapView.k = k1;
+    applyMapTransform();
+  }
+
+  function resetMapView() {
+    mapView.k = 1; mapView.tx = 0; mapView.ty = 0;
+    applyMapTransform();
+  }
+
   function renderMap() {
     var world = state.world;
     if (!world) return;
     var vb = viewBox(world);
     el.map.setAttribute("viewBox", vb.join(" "));
 
+    if (!landDrawn) {
+      el.mapLand.innerHTML = '<path class="map-land" d="' + world.land + '"/>';
+      landDrawn = true;
+    }
+
     var metric = MAP_METRIC[state.mapMetric];
     var buckets = rankBy(COUNTRY).filter(function (b) { return world.points[b.name] && metric.value(b) > 0; });
     var max = buckets.reduce(function (m, b) { return Math.max(m, metric.value(b)); }, 0);
     var ranked = buckets.slice().sort(function (a, b) { return metric.value(b) - metric.value(a); });
 
-    // 면적 비례(√)로 반지름 결정 — 값의 비율이 원 크기로 그대로 읽히게
-    function radius(b) {
-      if (!max) return 0;
-      return 4.5 + Math.sqrt(metric.value(b) / max) * 19.5;
-    }
+    // 아이콘 크기는 값의 제곱근에 비례 — 넓이가 값에 비례해 보이도록
+    function size(b) { return max ? 12 + Math.sqrt(metric.value(b) / max) * 15 : 0; }
 
-    // 큰 원부터 그려서 작은 원이 위에 오게 한다 (유럽처럼 몰려 있는 곳에서 작은 원이 묻히지 않도록)
-    var bubbles = ranked.map(function (b) {
+    // 큰 고래부터 그려서 작은 고래가 위에 오게 한다 (몰린 지역에서 작은 쪽이 묻히지 않도록)
+    el.mapMarks.innerHTML = ranked.map(function (b, rank) {
       var p = world.points[b.name];
       var selected = state.country === b.index;
-      return '<circle class="map-bubble' + (selected ? " is-selected" : "") + '" cx="' + p[0] + '" cy="' + p[1] +
-        '" r="' + radius(b).toFixed(1) + '" data-index="' + b.index + '" tabindex="0" role="button"' +
+      var s = size(b);
+      var hit = Math.max(s * 0.55, 15);
+      var label = rank < 3
+        ? '<text class="mark-value" y="' + (-s * 0.55 - 5) + '" text-anchor="middle">' + b.name + " " + metric.format(b) + "</text>"
+        : "";
+      return '<g class="map-mark' + (selected ? " is-selected" : "") + '" data-index="' + b.index +
+        '" data-x="' + p[0] + '" data-y="' + p[1] + '" tabindex="0" role="button"' +
         ' data-tip-title="' + b.name + '"' +
         ' data-tip-body="고래 ' + num(b.whales) + '명 · 고래 매출 ' + usd(b.whaleRevenue) +
         ' · 이 나라 매출의 ' + pct(b.whaleRevenue, b.revenue) + '"' +
         ' aria-label="' + b.name + " " + metric.label + " " + metric.format(b) + ', 누르면 필터">' +
-        "</circle>";
+        '<g class="mark-inner">' +
+        '<circle class="mark-hit" r="' + hit.toFixed(1) + '"></circle>' +
+        (selected ? '<circle class="mark-ring" r="' + (hit + 4).toFixed(1) + '"></circle>' : "") +
+        '<text class="mark-emoji" font-size="' + s.toFixed(1) + '" text-anchor="middle" dy="0.35em">🐳</text>' +
+        "</g>" +
+        label +
+        '<text class="mark-name" y="' + (s * 0.55 + 13) + '" text-anchor="middle">' + b.name + "</text>" +
+        "</g>";
     }).join("");
 
-    var labels = ranked.slice(0, 3).map(function (b) {
-      var p = world.points[b.name];
-      var anchor = p[0] > vb[0] + vb[2] - 150 ? "end" : "start";
-      var dx = anchor === "end" ? -(radius(b) + 6) : radius(b) + 6;
-      return '<text class="map-label" x="' + (p[0] + dx) + '" y="' + (p[1] + 4) + '" text-anchor="' + anchor + '">' +
-        b.name + " " + metric.format(b) + "</text>";
-    }).join("");
-
-    el.map.innerHTML = '<path class="map-land" d="' + world.land + '"/>' + bubbles + labels;
+    applyMapTransform();
 
     var totalWhaleRevenue = buckets.reduce(function (s, b) { return s + b.whaleRevenue; }, 0);
-    el.mapSummary.textContent = state.genre === null
-      ? "전체 장르 기준 · 고래가 있는 나라 " + num(buckets.length) + "개국 · 고래 매출 합계 " + usd(totalWhaleRevenue)
-      : state.data.dims.genre[state.genre] + " 기준 · 고래가 있는 나라 " + num(buckets.length) + "개국 · 고래 매출 합계 " + usd(totalWhaleRevenue);
+    el.mapSummary.textContent = (state.genre === null ? "전체 장르" : state.data.dims.genre[state.genre]) +
+      " 기준 · 고래가 있는 나라 " + num(buckets.length) + "개국 · 고래 매출 합계 " + usd(totalWhaleRevenue);
 
     var top = ranked[0];
     el.mapLegend.innerHTML =
-      '<span><span class="bubble-key" style="width:10px;height:10px"></span>작음</span>' +
-      '<span><span class="bubble-key" style="width:22px;height:22px"></span>큼 — 원 넓이가 ' + metric.label + '에 비례</span>' +
-      (top ? '<span>가장 큰 나라: <strong style="color:var(--amber)">' + top.name + " " + metric.format(top) + "</strong></span>" : "") +
+      '<span class="legend-item"><span class="seg-emoji is-sm" aria-hidden="true">🐳</span>작음 →' +
+      '<span class="seg-emoji is-lg" aria-hidden="true">🐳</span>큼 · 크기는 ' + metric.label + '</span>' +
+      (top ? '<span>1위: <strong style="color:var(--amber)">' + top.name + " " + metric.format(top) + "</strong></span>" : "") +
       (state.mapMetric === "share"
         ? '<span>결제자가 적은 나라는 비중이 크게 흔들립니다 — 규모는 “고래 매출”로 확인하세요.</span>'
         : '<span>정확한 값은 아래 국가 랭킹 표에서 볼 수 있습니다.</span>');
@@ -387,7 +439,7 @@
         "명은 장르 랭킹에서 제외했습니다(둘 다 미상인 유저 " +
         num(m.unknownCountry + m.unknownGenre - m.unknownDims) + "명). 그래서 랭킹의 매출 합계는 총 매출보다 작습니다."],
       ["지도 읽는 법",
-        "원의 넓이가 선택한 지표(고래 매출 또는 고래 매출 비중)에 비례합니다. 고래가 없는 나라는 원이 표시되지 않습니다. 배경 지도는 Natural Earth 110m(퍼블릭 도메인) 데이터를 미리 SVG로 변환해 넣었습니다."],
+        "🐳 아이콘 크기가 선택한 지표(고래 매출 또는 고래 매출 비중)에 비례합니다. 고래가 없는 나라에는 아이콘이 없습니다. 유럽처럼 몰린 지역은 드래그로 옮기고 +/− · 더블클릭으로 확대하면 겹친 고래가 떨어집니다. 배경 지도는 Natural Earth 110m(퍼블릭 도메인) 데이터를 미리 SVG로 변환해 넣었습니다."],
       ["데이터 기준", "유저 " + num(m.users) + "명 · 결제 유저 " + num(m.payers) + "명 · 총 매출 " + usd(m.revenue) +
         " · 마지막 결제일 " + m.dateFrom + " ~ " + m.dateTo + " (스냅샷 1회분)"],
       ["추이 차트가 없는 이유",
@@ -516,27 +568,119 @@
     });
   }
 
-  function selectBubble(bubble) {
-    var idx = Number(bubble.getAttribute("data-index"));
-    bounce(bubble);                       // 먼저 튀고, 그 다음 다시 그린다
+  function selectMark(mark) {
+    var idx = Number(mark.getAttribute("data-index"));
+    bounce(mark.querySelector(".mark-inner"));     // 먼저 튀고, 그 다음 다시 그린다
     setTimeout(function () {
       state.country = state.country === idx ? null : idx;
       render();
-      var next = el.map.querySelector('.map-bubble[data-index="' + idx + '"]');
+      var next = el.mapMarks.querySelector('.map-mark[data-index="' + idx + '"] .mark-inner');
       if (next && state.country === idx) bounce(next);
     }, 190);
   }
 
-  function bindMap() {
-    el.map.addEventListener("click", function (e) {
-      var bubble = closest(e.target, ".map-bubble");
-      if (bubble) selectBubble(bubble);
+  /* 드래그 이동 · Ctrl+휠 / 더블클릭 / 버튼 확대. 확대하면 고래 아이콘은 그대로고 간격만 벌어진다. */
+  function bindMapNavigation() {
+    var pointers = {};       // pointerId -> {x, y}
+    var dragging = false, moved = 0, panStart = null;
+
+    function toView(clientX, clientY) {
+      var r = el.map.getBoundingClientRect();
+      var vb = viewBox(state.world);
+      return {
+        x: vb[0] + (clientX - r.left) / r.width * vb[2],
+        y: vb[1] + (clientY - r.top) / r.height * vb[3]
+      };
+    }
+    function pointerList() { return Object.keys(pointers).map(function (id) { return pointers[id]; }); }
+    function pinchDistance(ps) { return Math.hypot(ps[0].x - ps[1].x, ps[0].y - ps[1].y); }
+
+    var pinchStart = null;
+
+    el.map.addEventListener("pointerdown", function (e) {
+      pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+      var ps = pointerList();
+      if (ps.length === 2) {
+        pinchStart = { dist: pinchDistance(ps), k: mapView.k };
+        dragging = false;
+        return;
+      }
+      dragging = true;
+      moved = 0;
+      panStart = { view: toView(e.clientX, e.clientY), tx: mapView.tx, ty: mapView.ty, x: e.clientX, y: e.clientY };
+      try { el.map.setPointerCapture(e.pointerId); } catch (err) { /* 포인터가 이미 놓인 경우 */ }
     });
+
+    el.map.addEventListener("pointermove", function (e) {
+      if (!(e.pointerId in pointers)) return;
+      pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+      var ps = pointerList();
+
+      if (pinchStart && ps.length === 2) {
+        var ratio = pinchDistance(ps) / pinchStart.dist;
+        var mid = toView((ps[0].x + ps[1].x) / 2, (ps[0].y + ps[1].y) / 2);
+        var target = clamp(pinchStart.k * ratio, 1, 8);
+        zoomAt(target / mapView.k, mid.x, mid.y);
+        return;
+      }
+      if (!dragging || !panStart) return;
+      moved = Math.max(moved, Math.hypot(e.clientX - panStart.x, e.clientY - panStart.y));
+      var now = toView(e.clientX, e.clientY);
+      mapView.tx = panStart.tx + (now.x - panStart.view.x);
+      mapView.ty = panStart.ty + (now.y - panStart.view.y);
+      applyMapTransform();
+    });
+
+    function endPointer(e) {
+      delete pointers[e.pointerId];
+      if (pointerList().length < 2) pinchStart = null;
+      if (!dragging) return;
+      dragging = false;
+      if (moved < 5) {                       // 끌지 않았으면 클릭으로 본다
+        var mark = closest(e.target, ".map-mark");
+        if (mark) selectMark(mark);
+      }
+      panStart = null;
+    }
+    el.map.addEventListener("pointerup", endPointer);
+    el.map.addEventListener("pointercancel", endPointer);
+
+    el.map.addEventListener("wheel", function (e) {
+      if (!(e.ctrlKey || e.metaKey)) return;   // 일반 휠은 페이지 스크롤 그대로
+      e.preventDefault();
+      var p = toView(e.clientX, e.clientY);
+      zoomAt(Math.exp(-e.deltaY * 0.0022), p.x, p.y);
+    }, { passive: false });
+
+    el.map.addEventListener("dblclick", function (e) {
+      var p = toView(e.clientX, e.clientY);
+      zoomAt(e.shiftKey ? 1 / 1.8 : 1.8, p.x, p.y);
+    });
+
     el.map.addEventListener("keydown", function (e) {
-      if (e.key !== "Enter" && e.key !== " ") return;
-      var bubble = closest(e.target, ".map-bubble");
-      if (bubble) { e.preventDefault(); selectBubble(bubble); }
+      var mark = closest(e.target, ".map-mark");
+      if (mark && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); selectMark(mark); return; }
+      var step = 40 / mapView.k;
+      if (e.key === "ArrowLeft") { mapView.tx += step; applyMapTransform(); e.preventDefault(); }
+      else if (e.key === "ArrowRight") { mapView.tx -= step; applyMapTransform(); e.preventDefault(); }
+      else if (e.key === "ArrowUp") { mapView.ty += step; applyMapTransform(); e.preventDefault(); }
+      else if (e.key === "ArrowDown") { mapView.ty -= step; applyMapTransform(); e.preventDefault(); }
+      else if (e.key === "+" || e.key === "=") { zoomAt(1.4); e.preventDefault(); }
+      else if (e.key === "-") { zoomAt(1 / 1.4); e.preventDefault(); }
     });
+
+    Array.prototype.forEach.call(document.querySelectorAll(".zoom-btn"), function (btn) {
+      btn.addEventListener("click", function () {
+        var kind = btn.getAttribute("data-zoom");
+        if (kind === "in") zoomAt(1.5);
+        else if (kind === "out") zoomAt(1 / 1.5);
+        else resetMapView();
+      });
+    });
+  }
+
+  function bindMap() {
+    bindMapNavigation();
 
     Array.prototype.forEach.call(document.querySelectorAll(".metric-btn"), function (btn) {
       btn.addEventListener("click", function () {
@@ -554,13 +698,12 @@
     });
   }
 
-  /* 고래 아이콘을 누르면 쫀득하게 튄다 (지도 버블 · 세그먼트 카드 · 스택 바) */
+  /* 고래를 누르면 쫀득하게 튄다 (세그먼트 카드 · 스택 바 — 지도는 selectMark가 담당) */
   function bindWhaleBounce() {
     document.addEventListener("click", function (e) {
       var tile = closest(e.target, '[data-seg-tile="Whale"], [data-seg="Whale"]');
       if (!tile) return;
-      var target = tile.querySelector(".seg-icon") || tile;
-      bounce(target);
+      bounce(tile.querySelector(".seg-emoji") || tile);
     });
   }
 

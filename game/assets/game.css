@@ -180,16 +180,17 @@ h2 {
   flex-wrap: wrap;
 }
 
-/* ---------- icons ---------- */
-.seg-icon {
-  width: 30px;
-  height: 20px;
+/* ---------- icons (emoji) ---------- */
+.seg-emoji {
+  font-size: 1.25rem;
+  line-height: 1;
   flex-shrink: 0;
   display: inline-block;
-  vertical-align: -3px;
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  vertical-align: -2px;
 }
-.seg-icon.is-sm { width: 22px; height: 15px; }
-.seg-icon.is-lg { width: 44px; height: 29px; }
+.seg-emoji.is-sm { font-size: 1rem; }
+.seg-emoji.is-lg { font-size: 1.75rem; }
 
 /* ---------- filters ---------- */
 .controls-card {
@@ -334,24 +335,83 @@ h2 {
   overflow-x: auto;                 /* 좁은 화면에서는 지도를 줄이지 말고 옆으로 넘긴다 */
 }
 
-.map-wrap svg { display: block; width: 100%; min-width: 540px; height: auto; }
+.map-wrap svg { display: block; width: 100%; min-width: 640px; height: auto; }
 
 .map-land { fill: #2A4459; stroke: #3B5D76; stroke-width: 0.6; }
 
-.map-bubble {
-  fill: var(--amber);
-  fill-opacity: 0.75;
-  stroke: #0E1B25;              /* 2px 서피스 링 — 겹쳐도 각 마크가 살아 있게 */
-  stroke-width: 2;
-  cursor: pointer;
-  transform-box: fill-box;
-  transform-origin: center;
-  transition: fill-opacity 0.18s ease;
-}
-.map-bubble:hover, .map-bubble:focus-visible { fill-opacity: 1; }
-.map-bubble.is-selected { fill: var(--teal); fill-opacity: 1; }
+.map-wrap svg { touch-action: pan-y; cursor: grab; }
+.map-wrap svg:active { cursor: grabbing; }
 
-.map-bubble.is-bouncing { animation: whale-pop 0.62s var(--ease-pop); }
+.map-mark { cursor: pointer; }
+
+.mark-hit { fill: transparent; }
+
+.mark-emoji {
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  paint-order: stroke;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.85));
+  pointer-events: none;
+}
+
+.mark-ring {
+  fill: none;
+  stroke: var(--amber);
+  stroke-width: 2.5;
+  pointer-events: none;
+}
+
+.mark-value, .mark-name {
+  fill: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+  paint-order: stroke;
+  stroke: #0E1B25;
+  stroke-width: 3.5;
+  pointer-events: none;
+}
+
+.mark-name { font-size: 11px; fill: var(--ink-2); opacity: 0; transition: opacity 0.2s ease; }
+.is-zoomed .mark-name { opacity: 1; }                 /* 확대하면 나라 이름이 따라 나온다 */
+.map-mark.is-selected .mark-name { opacity: 1; fill: var(--amber); }
+
+.mark-inner { transform-box: fill-box; transform-origin: center; }
+.mark-inner.is-bouncing { animation: whale-pop 0.62s var(--ease-pop); }
+
+.map-zoom {
+  position: absolute;
+  top: var(--space-8);
+  right: var(--space-8);
+  display: flex;
+  gap: var(--space-4);
+}
+
+.zoom-btn {
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--ink);
+  background: rgba(11, 20, 28, 0.78);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-small);
+  min-width: 32px;
+  height: 32px;
+  padding: 0 var(--space-8);
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.zoom-btn:hover:not(:disabled) { color: var(--amber); border-color: var(--amber); }
+.zoom-btn:disabled { opacity: 0.4; cursor: default; }
+
+.map-hint {
+  position: absolute;
+  left: var(--space-8);
+  bottom: var(--space-8);
+  margin: 0;
+  padding: var(--space-4) var(--space-8);
+  border-radius: var(--radius-small);
+  background: rgba(11, 20, 28, 0.72);
+  pointer-events: none;
+}
 
 @keyframes whale-pop {
   0%   { transform: scale(1, 1); }
@@ -362,7 +422,7 @@ h2 {
   100% { transform: scale(1, 1); }
 }
 
-.seg-icon.is-bouncing { animation: whale-pop 0.62s var(--ease-pop); transform-origin: center; }
+.seg-emoji.is-bouncing { animation: whale-pop 0.62s var(--ease-pop); transform-origin: center; }
 
 .map-label {
   fill: var(--ink);
@@ -383,14 +443,7 @@ h2 {
   font-size: 0.75rem;
   color: var(--ink-3);
 }
-.map-legend .bubble-key {
-  display: inline-block;
-  border-radius: 50%;
-  background: var(--amber);
-  opacity: 0.75;
-  margin-right: var(--space-4);
-  vertical-align: -1px;
-}
+.map-legend .legend-item { display: inline-flex; align-items: center; gap: var(--space-4); }
 
 /* ---------- segments ---------- */
 .segment-headline {
@@ -419,7 +472,8 @@ h2 {
 
 .stack-seg {
   border: none;
-  padding: 0 var(--space-8);
+  padding: 0 5px;
+  justify-content: center;
   display: flex;
   align-items: center;
   gap: var(--space-4);
@@ -436,7 +490,7 @@ h2 {
 .stack-seg:hover { filter: brightness(1.12); }
 .stack-seg:first-child { border-radius: var(--radius-small) 0 0 var(--radius-small); }
 .stack-seg:last-child { border-radius: 0 var(--radius-small) var(--radius-small) 0; }
-.stack-seg .seg-icon { color: inherit; }
+.stack-seg .seg-emoji { font-size: 1.125rem; }
 
 .chart-legend {
   display: flex;
