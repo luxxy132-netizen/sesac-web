@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(PYTHONIOENCODING=utf-8 python analyze.py)",
+      "Bash(python analyze.py)",
+      "Bash(python -c ' *)",
+      "Bash(gh auth *)",
+      "Bash(gh --version)",
+      "Bash(git --version)",
+      "Bash(where git-credential-manager *)",
+      "Bash(git config *)",
+      "Bash(echo \"exit:$?\")",
+      "Bash(where winget *)",
+      "Bash(where choco *)",
+      "Bash(where scoop *)",
+      "PowerShell(winget install --id GitHub.cli -e --accept-source-agreements --accept-package-agreements)",
+      "PowerShell(gh --version)",
+      "PowerShell(& \"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" --version)",
+      "PowerShell(& \"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" auth status)",
+      "PowerShell(& \"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" auth login --hostname github.com --git-protocol https --web)",
+      "PowerShell(& \"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" api user --jq \"{login: .login, name: .name, email: .email}\")",
+      "PowerShell(& \"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" api user --jq \".id\")",
+      "PowerShell(git config --global user.name \"Sujeong\")",
+      "PowerShell(git config --global user.email \"286922977+luxxy132-netizen@users.noreply.github.com\")",
+      "PowerShell(git config --global --list)",
+      "PowerShell(& \"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" repo view luxxy132-netizen/sesac-web --json name,url,defaultBranchRef,isPrivate)",
+      "Bash(git init *)",
+      "Bash(git add *)"
+    ]
+  }
+}
