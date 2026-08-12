@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>모바일 게임 인앱 결제 대시보드</title>
+<meta name="description" content="모바일 게임 유저 3,024명의 인앱 결제 데이터를 국가·장르·소비 세그먼트로 살펴보는 라이브 운영용 대시보드">
+<link rel="stylesheet" href="assets/game.css">
+</head>
+<body class="dashboard">
+  <main>
+    <header class="page-header">
+      <div class="page-header-text">
+        <span class="eyebrow">GAME ANALYTICS</span>
+        <h1>모바일 게임 인앱 결제 대시보드</h1>
+        <p class="lead">유저 3,024명의 결제 데이터를 국가 · 장르 · 소비 세그먼트로 나눠 봅니다. 매출이 어디서, 누구에게서 나오는지 확인하세요.</p>
+      </div>
+      <nav class="top-nav" aria-label="보조 메뉴">
+        <a href="../index.html">← 아파트 대시보드</a>
+      </nav>
+    </header>
+
+    <p id="errorBanner" class="error-state card" hidden></p>
+
+    <section class="card controls-card" aria-label="필터">
+      <div class="control-group">
+        <label for="countrySelect">국가</label>
+        <select id="countrySelect" class="dim-select"></select>
+      </div>
+      <div class="control-group">
+        <label for="genreSelect">장르</label>
+        <select id="genreSelect" class="dim-select"></select>
+      </div>
+      <button id="resetBtn" class="reset-btn" type="button">필터 초기화</button>
+      <p id="filterSummary" class="filter-summary" aria-live="polite"></p>
+    </section>
+
+    <section class="kpi-row" id="kpiRow" aria-label="핵심 지표"></section>
+
+    <section class="card segment-card" aria-label="소비 세그먼트">
+      <div class="section-header">
+        <h2>소비 세그먼트</h2>
+        <span class="caption">결제액 규모로 나눈 유저 등급 · 물음표에 마우스를 올리면 정의가 보입니다</span>
+      </div>
+
+      <p class="segment-headline" id="segmentHeadline"></p>
+
+      <figure class="stack-figure">
+        <figcaption class="stack-caption">세그먼트별 매출 비중</figcaption>
+        <div class="stack-bar" id="stackBar" role="group" aria-label="세그먼트별 매출 비중 스택 바"></div>
+        <div class="chart-legend" id="stackLegend"></div>
+      </figure>
+
+      <div class="segment-grid" id="segmentGrid"></div>
+    </section>
+
+    <div class="content-grid">
+      <section class="card ranking-card" aria-label="국가 랭킹">
+        <div class="section-header">
+          <h2>국가 랭킹</h2>
+          <span class="caption">헤더 클릭으로 정렬 · 행 클릭으로 필터</span>
+        </div>
+        <div class="table-scroll" id="countryTableWrap"></div>
+      </section>
+
+      <section class="card ranking-card" aria-label="장르 랭킹">
+        <div class="section-header">
+          <h2>장르 랭킹</h2>
+          <span class="caption">헤더 클릭으로 정렬 · 행 클릭으로 필터</span>
+        </div>
+        <div class="table-scroll" id="genreTableWrap"></div>
+      </section>
+    </div>
+
+    <section class="card notes-card" aria-label="지표 정의와 데이터 기준">
+      <div class="section-header">
+        <h2>지표 정의 · 데이터 기준</h2>
+      </div>
+      <dl class="notes-list" id="notesList"></dl>
+    </section>
+
+    <footer class="page-footer">
+      <p class="caption">데이터 출처: mobile_game_inapp_purchases.csv · 정적 대시보드(외부 라이브러리 없음)</p>
+    </footer>
+  </main>
+
+  <div class="tooltip-pop" id="tooltipPop" role="tooltip" hidden></div>
+  <script src="assets/game.js"></script>
+</body>
+</html>

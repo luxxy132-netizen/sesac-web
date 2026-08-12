@@ -247,6 +247,8 @@ main > * { min-width: 0; }
 
 .page-header-text { min-width: 0; }
 
+.top-nav { display: flex; gap: var(--space-8); flex-wrap: wrap; }
+
 .top-nav a {
   display: inline-flex;
   align-items: center;
