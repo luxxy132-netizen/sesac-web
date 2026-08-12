@@ -2,75 +2,277 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>한수정</title>
 <style>
-  body { font-family: sans-serif; font-size: 18px; line-height: 1.6; margin: 40px; }
-  h1 { font-size: 36px; }
-  table { border-collapse: collapse; margin-top: 20px; }
-  th, td { border: 1px solid #333; padding: 8px 16px; text-align: left; }
+  /* Montage(@wanteddev/wds) design tokens: https://github.com/wanteddev/montage-web */
+  :root {
+    --color-primary-normal: #FF4242;
+    --color-primary-strong: #E52222;
+    --color-primary-heavy: #B00C0C;
+    --color-primary-bg: #FEECEC;
+
+    --color-label-normal: #171717;
+    --color-label-neutral: rgba(48, 48, 48, 0.88);
+    --color-label-alternative: rgba(56, 56, 56, 0.61);
+    --color-label-assistive: rgba(56, 56, 56, 0.28);
+
+    --color-bg-normal: #ffffff;
+    --color-bg-alternative: #F7F7F7;
+
+    --color-line-normal: rgba(115, 115, 115, 0.22);
+    --color-line-solid: #F2F2F2;
+
+    --color-status-positive: #16A34A;
+
+    --radius-medium: 12px;
+    --radius-large: 16px;
+
+    --shadow-small: 0px 2px 4px -2px rgba(23, 23, 23, 0.06), 0px 4px 6px -1px rgba(23, 23, 23, 0.06);
+    --shadow-medium: 0px 4px 6px -2px rgba(23, 23, 23, 0.07), 0px 10px 15px -3px rgba(23, 23, 23, 0.07);
+
+    --space-4: 4px;
+    --space-8: 8px;
+    --space-12: 12px;
+    --space-16: 16px;
+    --space-24: 24px;
+    --space-32: 32px;
+    --space-48: 48px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    color: var(--color-label-normal);
+    background: var(--color-bg-alternative);
+    margin: 0;
+    padding: var(--space-48) var(--space-16);
+  }
+
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-32);
+  }
+
+  .card {
+    background: var(--color-bg-normal);
+    border-radius: var(--radius-large);
+    box-shadow: var(--shadow-medium);
+    padding: var(--space-32);
+  }
+
+  .eyebrow {
+    display: inline-block;
+    font-size: 0.8125rem;
+    line-height: 1.125rem;
+    letter-spacing: 0.0194em;
+    font-weight: 600;
+    color: var(--color-primary-normal);
+    background: var(--color-primary-bg);
+    padding: var(--space-4) var(--space-12);
+    border-radius: 999px;
+    margin-bottom: var(--space-16);
+  }
+
+  h1 {
+    /* Typography/title2 */
+    font-size: 1.75rem;
+    line-height: 2.375rem;
+    letter-spacing: -0.0236em;
+    font-weight: 700;
+    margin: 0 0 var(--space-8);
+  }
+
+  .lead {
+    /* Typography/body1-reading */
+    font-size: 1rem;
+    line-height: 1.625rem;
+    letter-spacing: 0.0057em;
+    color: var(--color-label-neutral);
+    margin: 0;
+  }
+
+  .lead + .lead { margin-top: var(--space-4); }
+
+  .info-list {
+    margin-top: var(--space-24);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-16);
+    padding: var(--space-12) 0;
+    border-bottom: 1px solid var(--color-line-solid);
+  }
+
+  .info-row:last-child { border-bottom: none; }
+
+  .info-label {
+    /* Typography/label1 */
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    letter-spacing: 0.0145em;
+    color: var(--color-label-alternative);
+  }
+
+  .info-value {
+    /* Typography/body2 */
+    font-size: 0.9375rem;
+    line-height: 1.375rem;
+    letter-spacing: 0.0096em;
+    font-weight: 500;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: var(--space-16);
+  }
+
+  .section-header h1 { margin-bottom: 0; }
+
+  .caption {
+    /* Typography/caption1 */
+    font-size: 0.75rem;
+    line-height: 1rem;
+    letter-spacing: 0.0252em;
+    color: var(--color-label-assistive);
+  }
+
+  .deal-list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .deal-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-16);
+    padding: var(--space-16) 0;
+    border-bottom: 1px solid var(--color-line-solid);
+  }
+
+  .deal-item:last-child { border-bottom: none; }
+
+  .deal-main { display: flex; flex-direction: column; gap: var(--space-4); min-width: 0; }
+
+  .deal-name {
+    /* Typography/headline1 */
+    font-size: 1.125rem;
+    line-height: 1.625rem;
+    letter-spacing: -0.002em;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .deal-date {
+    /* Typography/label2 */
+    font-size: 0.8125rem;
+    line-height: 1.125rem;
+    letter-spacing: 0.0194em;
+    color: var(--color-label-alternative);
+  }
+
+  .deal-price {
+    /* Typography/heading2 */
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+    letter-spacing: -0.012em;
+    font-weight: 700;
+    color: var(--color-primary-normal);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .deal-price .unit {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--color-label-alternative);
+    margin-left: 2px;
+  }
 </style>
 </head>
 <body>
-  <h1>한수정</h1>
-  <p>
-    한수정입니다.<br>
-    저는 로블록스가 좋아요.<br>
-    앞으로도 재미있는 걸 많이 만들어보고 싶어요.
-  </p>
+  <main>
+    <section class="card">
+      <span class="eyebrow">INTRO</span>
+      <h1>한수정</h1>
+      <p class="lead">한수정입니다.</p>
+      <p class="lead">저는 로블록스가 좋아요.</p>
+      <p class="lead">앞으로도 재미있는 걸 많이 만들어보고 싶어요.</p>
 
-  <table>
-    <tr>
-      <th>항목</th>
-      <th>설명</th>
-    </tr>
-    <tr>
-      <td>좋아하는 것</td>
-      <td>로블록스</td>
-    </tr>
-    <tr>
-      <td>요즘 배우는 것</td>
-      <td>코딩</td>
-    </tr>
-    <tr>
-      <td>오늘 목표</td>
-      <td>index.html 완성하기</td>
-    </tr>
-  </table>
+      <div class="info-list">
+        <div class="info-row">
+          <span class="info-label">좋아하는 것</span>
+          <span class="info-value">로블록스</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">요즘 배우는 것</span>
+          <span class="info-value">코딩</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">오늘 목표</span>
+          <span class="info-value">index.html 완성하기</span>
+        </div>
+      </div>
+    </section>
 
-  <h1>은평구 아파트 실거래 살펴보기</h1>
-  <p>은평구 개 호감 아파트들</p>
+    <section class="card">
+      <div class="section-header">
+        <h1>은평구 아파트 실거래 살펴보기</h1>
+        <span class="caption">물건금액 상위 5건</span>
+      </div>
+      <p class="lead" style="margin-bottom: var(--space-24);">은평구 개 호감 아파트들</p>
 
-  <table>
-    <tr>
-      <th>건물명</th>
-      <th>물건금액(만원)</th>
-      <th>계약일</th>
-    </tr>
-    <tr>
-      <td>은평뉴타운 제각말 푸르지오(5-2단지)</td>
-      <td>193000</td>
-      <td>2026-04-02</td>
-    </tr>
-    <tr>
-      <td>DMCSKVIEW</td>
-      <td>186500</td>
-      <td>2025-10-11</td>
-    </tr>
-    <tr>
-      <td>DMC센트럴자이(3단지)</td>
-      <td>180000</td>
-      <td>2026-05-23</td>
-    </tr>
-    <tr>
-      <td>DMC센트럴자이(1단지)</td>
-      <td>180000</td>
-      <td>2026-06-09</td>
-    </tr>
-    <tr>
-      <td>DMC센트럴자이(3단지)</td>
-      <td>179000</td>
-      <td>2026-05-25</td>
-    </tr>
-  </table>
+      <div class="deal-list">
+        <div class="deal-item">
+          <div class="deal-main">
+            <span class="deal-name">은평뉴타운 제각말 푸르지오(5-2단지)</span>
+            <span class="deal-date">2026-04-02</span>
+          </div>
+          <span class="deal-price">193,000<span class="unit">만원</span></span>
+        </div>
+        <div class="deal-item">
+          <div class="deal-main">
+            <span class="deal-name">DMCSKVIEW</span>
+            <span class="deal-date">2025-10-11</span>
+          </div>
+          <span class="deal-price">186,500<span class="unit">만원</span></span>
+        </div>
+        <div class="deal-item">
+          <div class="deal-main">
+            <span class="deal-name">DMC센트럴자이(3단지)</span>
+            <span class="deal-date">2026-05-23</span>
+          </div>
+          <span class="deal-price">180,000<span class="unit">만원</span></span>
+        </div>
+        <div class="deal-item">
+          <div class="deal-main">
+            <span class="deal-name">DMC센트럴자이(1단지)</span>
+            <span class="deal-date">2026-06-09</span>
+          </div>
+          <span class="deal-price">180,000<span class="unit">만원</span></span>
+        </div>
+        <div class="deal-item">
+          <div class="deal-main">
+            <span class="deal-name">DMC센트럴자이(3단지)</span>
+            <span class="deal-date">2026-05-25</span>
+          </div>
+          <span class="deal-price">179,000<span class="unit">만원</span></span>
+        </div>
+      </div>
+    </section>
+  </main>
 </body>
 </html>
