@@ -26,7 +26,15 @@
       "PowerShell(& \"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" repo view luxxy132-netizen/sesac-web --json name,url,defaultBranchRef,isPrivate)",
       "Bash(git init *)",
       "Bash(git add *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(git remote *)",
+      "Bash(git branch *)",
+      "Bash(git push *)",
+      "Bash(git fetch *)",
+      "Bash(git ls-tree *)",
+      "Bash(git pull *)",
+      "PowerShell(& \"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" api -X POST repos/luxxy132-netizen/sesac-web/pages -f \"source[branch]=main\" -f \"source[path]=/\")",
+      "PowerShell(& \"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" api repos/luxxy132-netizen/sesac-web/pages/builds/latest --jq \"{status: .status, error: .error}\")"
     ]
   }
 }
